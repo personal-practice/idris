@@ -1,0 +1,32 @@
+module Main
+
+main : IO ()
+main = do
+  putStr "Hello world"
+
+data Vect : Nat -> Type -> Type where
+     Nil  : Vect Z a
+     (::) : a -> Vect k a -> Vect (S k) a
+
+%name Vect xs, ys, zs
+
+zipWith : (a -> b -> c) -> Vect n a -> Vect n b -> Vect n c
+zipWith f [] [] = []
+zipWith f (x :: xs) (y :: ys) = f x y :: zipWith f xs ys
+
+empties : Vect m (Vect 0 a)
+empties {m = Z} = []
+empties {m = (S k)} = [] :: empties
+
+transpose_recursive : (row : Vect m a) -> (rows_trans : Vect m (Vect k a)) -> Vect m (Vect (S k) a)
+transpose_recursive [] [] = []
+transpose_recursive (x :: y) (z :: w) = (x :: z) :: transpose_recursive y w
+
+transposeV : Vect n (Vect m a) -> Vect m (Vect n a)
+transposeV [] = empties
+transposeV (row :: rows) = let rows_trans = transposeV rows in
+                               transpose_recursive row rows_trans
+
+(++) : Vect n a -> Vect m a -> Vect (n + m) a
+(++) [] ys = ys
+(++) (x :: xs) ys = x :: xs ++ ys
